@@ -241,7 +241,7 @@ To do so, we'll extend sort `JSON` with some EVM specific syntax, and provide a 
     syntax EthereumCommand ::= "exception" | "failure" String | "success"
  // ---------------------------------------------------------------------
     rule <k> #exception ~> exception => . ... </k>
-    rule <k> success => . ... </k> <exit-code> _ => 0 </exit-code>
+    rule <k> success => clear ... </k> <exit-code> _ => 0 </exit-code>
     rule failure _ => .
 ```
 
