@@ -258,11 +258,14 @@ module ETHEREUM-SIMULATION
     syntax EthereumCommand ::= "run" JSON
  // -------------------------------------
     rule run { .JSONList } => .
-    rule run { TESTID : { TEST:JSONList } , TESTS }
-      => run ( TESTID : { #sortJSONList(TEST) } )
-      ~> #if #hasPost?( { TEST } ) #then .K #else exception #fi
-      ~> clear
-      ~> run { TESTS }
+    rule <k> run { TESTID : { TEST:JSONList } , TESTS }
+          => run ( TESTID : { #sortJSONList(TEST) } )
+          ~> #if #hasPost?( { TEST } ) #then .K #else exception #fi
+          ~> clear
+          ~> run { TESTS }
+         ...
+         </k>
+         <exit-code> _ => 1 </exit-code>
 
     syntax Bool ::= "#hasPost?" "(" JSON ")" [function]
  // ---------------------------------------------------
