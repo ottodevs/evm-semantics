@@ -271,13 +271,13 @@ module EVM-PRIME
     rule #width( bytes ( N ) ) => N
 
 
-// -   `procedure (_) {_}` declares new variables in scope for the environment
-//     (note that new variables shadow existing ones).
+// -   `scope (_) {_}` declares new variables in scope for the environment (note
+//     that new variables shadow existing ones).
 
 
-    syntax PrimeOp ::= "procedure" "(" Vars ")" "{" OpCodes "}"
+    syntax PrimeOp ::= "scope" "(" Vars ")" "{" OpCodes "}"
  // -----------------------------------------------------------
-    rule #resolvePrimeOp( IDS1  , procedure ( IDS2 ) { OPS } ) => #resolvePrimeOps( (IDS1 ; IDS2), OPS )
+    rule #resolvePrimeOp( IDS1  , scope ( IDS2 ) { OPS } ) => #resolvePrimeOps( (IDS1 ; IDS2), OPS )
 
 
 // -   `mload` loads variables from the `localMem` onto the `wordStack` (using the
@@ -308,7 +308,7 @@ module EVM-PRIME
 
 // ### Example {#example-3}
 
-// In this example, we use `procedure` to declare some variables and use them with
+// In this example, we use `scope` to declare some variables and use them with
 // `mload` and `mstore`.
 
 // Expressions
