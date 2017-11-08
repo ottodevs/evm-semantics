@@ -48,12 +48,13 @@ module EVM-PRIME
     rule #resolvePrimeOp( CTX , OP ) => OP ; .OpCodes requires notBool isPrimeOp(OP)
 
     rule #resolvePrimeOps( _ , .OpCodes ) => .OpCodes
-    rule #resolvePrimeOps( CTX , OP ; OPS ) => #resolvePrimeOp(CTX , OP) ++OpCodes #resolvePrimeOps(CTX , OPS)
+    rule #resolvePrimeOps( CTX , OP ; OPS ) => #resolvePrimeOp(CTX , OP) ;; #resolvePrimeOps(CTX , OPS)
 
-    syntax OpCodes ::= OpCodes "++OpCodes" OpCodes [function]
+    syntax priority _;_ > _;;_
+    syntax OpCodes ::= OpCodes ";;" OpCodes [function, right]
  // ---------------------------------------------------------
-    rule .OpCodes    ++OpCodes OPS  => OPS
-    rule (OP ; OPS1) ++OpCodes OPS2 => OP ; (OPS1 ++OpCodes OPS2)
+    rule .OpCodes    ;; OPS  => OPS
+    rule (OP ; OPS1) ;; OPS2 => OP ; (OPS1 ;; OPS2)
 
 
 // -   `#compile` will desugar `PrimeOp`s with `#resolvePrimeOps` and then resolve
@@ -395,33 +396,26 @@ module EVM-PRIME
     syntax PrimeOp ::= "if" "(" ExpOp ")" "{" OpCodes "}"
  // -----------------------------------------------------
     rule #resolvePrimeOp( CTX , if ( COND ) { THEN } )
-      => #resolvePrimeOps(CTX , (             COND
-                                  ++OpCodes ( ISZERO
-                                            ; jumpi( #ifThenLabel(!LABEL:Int) +String "_end" )
-                                            ; THEN
-                                            ; .OpCodes
-                                            )
-                                  ++OpCodes ( jumpdest( #ifThenLabel(!LABEL) +String "_end" )
-                                            ; .OpCodes
-                                            )
+      => #resolvePrimeOps(CTX , ( COND
+                                ; ISZERO
+                                ; jumpi( #ifThenLabel(!LABEL:Int) +String "_end" )
+                                ; THEN
+                               ;; jumpdest( #ifThenLabel(!LABEL) +String "_end" )
+                                ; .OpCodes
                                 )
                          )
 
     syntax PrimeOp ::= "if" "(" ExpOp ")" "then" "{" OpCodes "}" "else" "{" OpCodes "}"
  // -----------------------------------------------------------------------------------
     rule #resolvePrimeOp( CTX , if ( COND ) then { THEN } else { ELSE } )
-      => #resolvePrimeOps(CTX , (             COND
-                                  ++OpCodes ( jumpi(#ifThenElseLabel(!LABEL:Int) +String "_true")
-                                            ; ELSE
-                                            )
-                                  ++OpCodes ( jump(#ifThenElseLabel(!LABEL) +String "_end")
-                                            ; jumpdest(#ifThenElseLabel(!LABEL) +String "_true")
-                                            ; THEN
-                                            ; .OpCodes
-                                            )
-                                  ++OpCodes ( jumpdest(#ifThenElseLabel(!LABEL) +String "_end")
-                                            ; .OpCodes
-                                            )
+      => #resolvePrimeOps(CTX , ( COND
+                                ; jumpi(#ifThenElseLabel(!LABEL:Int) +String "_true")
+                                ; ELSE
+                               ;; jump(#ifThenElseLabel(!LABEL) +String "_end")
+                                ; jumpdest(#ifThenElseLabel(!LABEL) +String "_true")
+                                ; THEN
+                               ;; jumpdest(#ifThenElseLabel(!LABEL) +String "_end")
+                                ; .OpCodes
                                 )
                          )
 
@@ -448,10 +442,9 @@ module EVM-PRIME
     rule #resolvePrimeOp( CTX , while ( COND ) { BODY } )
       =>   jumpdest( #whileLabel(!LABEL:Int) +String "_begin" )
          ; #resolvePrimeOp( CTX
-                          , if ( COND ) {             BODY
-                                          ++OpCodes ( jump( #whileLabel(!LABEL) +String "_begin" )
-                                                    ; .OpCodes
-                                                    )
+                          , if ( COND ) { BODY
+                                       ;; jump( #whileLabel(!LABEL) +String "_begin" )
+                                        ; .OpCodes
                                         }
                           )
 
