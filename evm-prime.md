@@ -543,31 +543,40 @@ Conditionals
     syntax PrimeOp ::= "if" "(" ExpOp ")" "{" OpCodes "}"
  // -----------------------------------------------------
     rule #resolvePrimeOp( CTX , if ( COND ) { THEN } )
-      =>             #resolvePrimeOp(CTX , COND)
-         ++OpCodes ( ISZERO
-                 ;   jumpi( #ifThenLabel(!LABEL:Int) +String "_end" )
-                 ; ( #resolvePrimeOps(CTX , THEN)
-         ++OpCodes ( jumpdest( #ifThenLabel(!LABEL) +String "_end" )
-                 ;   .OpCodes
-               )))
+      => #resolvePrimeOps(CTX , (             COND
+                                  ++OpCodes ( ISZERO
+                                            ; jumpi( #ifThenLabel(!LABEL:Int) +String "_end" )
+                                            ; THEN
+                                            ; .OpCodes
+                                            )
+                                  ++OpCodes ( jumpdest( #ifThenLabel(!LABEL) +String "_end" )
+                                            ; .OpCodes
+                                            )
+                                )
+                         )
 
     syntax PrimeOp ::= "if" "(" ExpOp ")" "then" "{" OpCodes "}" "else" "{" OpCodes "}"
  // -----------------------------------------------------------------------------------
     rule #resolvePrimeOp( CTX , if ( COND ) then { THEN } else { ELSE } )
-      =>             #resolvePrimeOp(CTX , COND)
-         ++OpCodes ( jumpi(#ifThenElseLabel(!LABEL:Int) +String "_true")
-                 ; ( #resolvePrimeOps(CTX , ELSE)
-         ++OpCodes ( jump(#ifThenElseLabel(!LABEL) +String "_end")
-                 ;   jumpdest(#ifThenElseLabel(!LABEL) +String "_true")
-                 ; ( #resolvePrimeOps(CTX , THEN)
-         ++OpCodes ( jumpdest(#ifThenElseLabel(!LABEL) +String "_end")
-                 ;   .OpCodes
-             )))))
+      => #resolvePrimeOps(CTX , (             COND
+                                  ++OpCodes ( jumpi(#ifThenElseLabel(!LABEL:Int) +String "_true")
+                                            ; ELSE
+                                            )
+                                  ++OpCodes ( jump(#ifThenElseLabel(!LABEL) +String "_end")
+                                            ; jumpdest(#ifThenElseLabel(!LABEL) +String "_true")
+                                            ; THEN
+                                            ; .OpCodes
+                                            )
+                                  ++OpCodes ( jumpdest(#ifThenElseLabel(!LABEL) +String "_end")
+                                            ; .OpCodes
+                                            )
+                                )
+                         )
 
     syntax String ::= #ifThenLabel     ( Int ) [function]
                     | #ifThenElseLabel ( Int ) [function]
  // -----------------------------------------------------
-    rule #ifThenLabel( N )     => "if_then_-" +String Int2String(N)
+    rule #ifThenLabel( N )     => "if_then_-"      +String Int2String(N)
     rule #ifThenElseLabel( N ) => "if_then_else_-" +String Int2String(N)
 ```
 
