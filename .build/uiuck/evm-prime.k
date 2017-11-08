@@ -40,7 +40,7 @@ module EVM-PRIME
 
     syntax OpCodes ::= #resolvePrimeOp  ( CompileCtx , OpCode  ) [function]
                      | #resolvePrimeOps ( CompileCtx , OpCodes ) [function]
- // ------------------------------------------------------------------------------
+ // -----------------------------------------------------------------------
     rule #resolvePrimeOp( CTX , OP ) => OP ; .OpCodes requires notBool isPrimeOp(OP)
 
     rule #resolvePrimeOps( _ , .OpCodes ) => .OpCodes
@@ -58,7 +58,7 @@ module EVM-PRIME
 
 
     syntax OpCodes ::= #compilePrimeOps ( OpCodes ) [function]
- // --------------------------------------------------
+ // ----------------------------------------------------------
     rule #compilePrimeOps(OPS) => #resolvePrimeOps(cctx(.Map , 0), OPS)
 
 
